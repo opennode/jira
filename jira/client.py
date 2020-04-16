@@ -2813,9 +2813,11 @@ class JIRA(object):
         return self._session.delete(url, params=params)
 
     def search_users(
-        self, user, startAt=0, maxResults=50, includeActive=True, includeInactive=False
+        self, user=None, startAt=0, maxResults=50, includeActive=True, includeInactive=False, query=None,
     ):
         """Get a list of user Resources that match the specified search string.
+        "username" query parameter is deprecated; the expected parameter now is "query", which can just be the full
+        email again. But the first parameter is kept for backwards compatibility.
 
         :param user: a string to match usernames, name or email against.
         :type user: str
@@ -2828,15 +2830,26 @@ class JIRA(object):
         :type includeActive: bool
         :param includeInactive: If true, then inactive users are included in the results. (Default: False)
         :type includeInactive: bool
+        :param query: Search term. It can just be the email.
+        :type query: str
 
 
         :rtype: ResultList
         """
+        if not user and not query:
+            raise ValueError("Either 'user' or 'query' arguments must be specified.")
+
         params = {
             "username": user,
             "includeActive": includeActive,
             "includeInactive": includeInactive,
         }
+
+        if user:
+            params["username"] = user
+        else:
+            params["query"] = query
+
         return self._fetch_pages(User, None, "user/search", startAt, maxResults, params)
 
     def search_allowed_users_for_issue(
