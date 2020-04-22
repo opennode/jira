@@ -2845,9 +2845,7 @@ class JIRA(object):
             "includeInactive": includeInactive,
         }
 
-        if user:
-            params["username"] = user
-        else:
+        if query:
             params["query"] = query
 
         return self._fetch_pages(User, None, "user/search", startAt, maxResults, params)
